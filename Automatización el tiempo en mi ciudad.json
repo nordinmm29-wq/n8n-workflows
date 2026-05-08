@@ -1,0 +1,125 @@
+{
+  "name": "Automatización el tiempo en mi ciudad",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -464,
+        -16
+      ],
+      "id": "09a6bfff-6538-4716-949b-5be6af2cc8b4",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://geocoding-api.open-meteo.com/v1/search?name=Barcelona&count=1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -256,
+        -16
+      ],
+      "id": "0417f589-2419-4e1c-b020-4ca75aacf04f",
+      "name": "Sacar latitud y longitud de ciudad"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.open-meteo.com/v1/forecast?latitude={{ $json.results[0].latitude }}&longitude={{ $json.results[0].longitude }}&hourly=temperature_2m,precipitation&current=temperature_2m,precipitation&past_days=0&forecast_days=7 ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -48,
+        -16
+      ],
+      "id": "f6c55799-0476-44bf-bb51-2b234141ce76",
+      "name": "Sacar información del tiempo"
+    },
+    {
+      "parameters": {
+        "sendTo": "nordinmm28@gmail.com",
+        "subject": "El tiempo para hoy!",
+        "message": "=<p>\nLa temperatura ahora mismo es de: {{ $json.current.temperature_2m }} grados.\n</p>\n\n<p>\nA las 10pm habrá {{ $json.hourly.temperature_2m[10] }} grados.\n</p>\n\n<p>\nLa probabilidad de que llueva es {{ $json.hourly.precipitation[10] }}%.\n</p> ",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        -16
+      ],
+      "id": "a7909b22-65fa-41dd-b135-a7bf3fb7950f",
+      "name": "Send a message",
+      "webhookId": "eba44392-9447-4706-b436-5c481ca6fd17",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9nOuZ9ROkL6M7Abk",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Sacar latitud y longitud de ciudad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sacar latitud y longitud de ciudad": {
+      "main": [
+        [
+          {
+            "node": "Sacar información del tiempo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sacar información del tiempo": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f451472f-395a-4cc8-9311-b1d24c90d865",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "33821b72dae919503d680e3ddc300734d9ecf45f64776fd52838d87d5889b7be"
+  },
+  "id": "Ht4M9eR7M6IYslrB",
+  "tags": []
+}

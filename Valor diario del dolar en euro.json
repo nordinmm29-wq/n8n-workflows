@@ -1,0 +1,266 @@
+{
+  "name": "Valor diario del dolar en euro",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 14,
+              "triggerAtMinute": 17
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -416,
+        -32
+      ],
+      "id": "61dfef6e-2a7c-43a1-bba4-c2701b1e9c45",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://cdn.moneyconvert.net/api/latest.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -208,
+        -160
+      ],
+      "id": "9fba4264-d5d1-42e9-a786-5847aeeacfa2",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1ed8a6a2-2c6a-4d40-8603-6563d72f2dca",
+              "name": "rates.USD",
+              "value": "={{ $json.rates.USD }}",
+              "type": "number"
+            },
+            {
+              "id": "213ba9d2-79c9-4c09-819b-a3857f54e767",
+              "name": "rates.EUR",
+              "value": "={{ $json.rates.EUR }}",
+              "type": "number"
+            },
+            {
+              "id": "75feb7eb-3216-4899-83c8-cd0475e7ad28",
+              "name": "date",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        176
+      ],
+      "id": "f614d256-af82-4c5e-a3f4-7633be6ae802",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $json.date }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        208,
+        -32
+      ],
+      "id": "27f42198-9480-497d-8c79-a1f446085ac6",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "sendTo": "nordinmm28@gmail.com",
+        "subject": "=Hoy {{ $('Date & Time').item.json.formattedDate }}  un dolar vale {{ $('Edit Fields').item.json.rates.EUR }} euros",
+        "message": "=Hoy  {{ $('Date & Time').item.json.formattedDate }} un dolar vale {{ $('Edit Fields').item.json.rates.EUR }} euros",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        784,
+        48
+      ],
+      "id": "d0d5b9c0-6b88-43df-85e6-a4bfa30506a5",
+      "name": "Send a message",
+      "webhookId": "cae5eb73-ddc4-44d4-9c72-481d5e444687",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9nOuZ9ROkL6M7Abk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-5-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Traduce esta fecha al español y al formato de españa:  {{ $json.formattedDate }}"
+            },
+            {
+              "content": "Eres un traductor experto del inglés al español de españa.\n\nTu mision y único trabajo es traducir textos del inglés al español.\n\nTambien puedes traducir fechas de cualquier formato al formato español.\n\nCualquier otra cosa, consulta o respuesta, está terminantemente prohibida.\n\nLa información debes devolverla en formato JSON.\n\nSiempre debes devolver los datos así:\n\n\"content\": [\n{\n\"type\": \n\"output_text\",\n\"annotations\": \n[\n], \n\"logprobs\": \n[\n],\n\"text\": \n\"{\\\"traduccion\\\": \\\"26/04/2026\\\"}\" \n}\n]"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        448,
+        -160
+      ],
+      "id": "9ad0e417-2683-43cf-b50e-4ceb85b25a4f",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "phFuFxX6MoveqweM",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [
+        320,
+        112
+      ],
+      "id": "2007ec86-54c0-49a1-8800-8ea9667f2783",
+      "name": "Date & Time1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        480,
+        112
+      ],
+      "id": "742464d1-6796-46df-8903-5d2df4e3ae33",
+      "name": "Calculator"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Message a model",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Message a model",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8d84f9c7-57a9-4cdb-9919-2e2992bd8c65",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "33821b72dae919503d680e3ddc300734d9ecf45f64776fd52838d87d5889b7be"
+  },
+  "id": "5eDSrlNLTouNDkqa",
+  "tags": []
+}

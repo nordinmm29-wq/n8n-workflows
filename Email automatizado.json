@@ -1,0 +1,104 @@
+{
+  "name": "Email automatizado",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "¿Quieres que hagamos tu proyecto?",
+        "formDescription": "Contacta con nosotros si quieres que hagamos tu página web, automatización, webapp IA, etc. Lo que sea de desarrollo de software.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nombre",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Apellidos",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Número móvil",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Propuesta",
+              "fieldType": "textarea",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "Enviar Propuesta"
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -352,
+        -16
+      ],
+      "id": "12d9402b-e5d4-4c3f-8e49-0aaac3d8cef6",
+      "name": "On form submission",
+      "webhookId": "820c2340-b3ce-47c8-a1c1-15d423a6d130"
+    },
+    {
+      "parameters": {
+        "sendTo": "nordinmm28@gmail.com",
+        "subject": "Propuesta de proyecto de formulario de contacto",
+        "message": "=<h1>Propuesta de proyecto</h1>\n\n<h2>{{ $json.Nombre }} {{ $json.Apellidos }} dice:</h2>\n\n<p>{{ $json.Propuesta }}</p>\n\nSu número de teléfono es: <strong>{{ $json['Número móvil'] }}</strong>.\n<p>\nY el Email es: {{ $json.Email }}\n</p>\n\nResponde cuanto antes!!",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -144,
+        -16
+      ],
+      "id": "383cd39d-df4f-4340-8633-ec7a19e0d09f",
+      "name": "Send a message",
+      "webhookId": "7631871c-bcf2-4afe-a8b8-93b06f91db87",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9nOuZ9ROkL6M7Abk",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "7042e070-a8e3-491e-a5ce-e64aceedf8b5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "33821b72dae919503d680e3ddc300734d9ecf45f64776fd52838d87d5889b7be"
+  },
+  "id": "LsiwspqOZdfP8Sdj",
+  "tags": []
+}

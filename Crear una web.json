@@ -1,0 +1,150 @@
+{
+  "name": "Crear una web",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "93bfa7aa-c612-43f8-a4ee-fc4eb2191a8d",
+              "name": "mensaje",
+              "value": "Este es miprimer mensaje en N8N",
+              "type": "string"
+            },
+            {
+              "id": "fa04e22c-a5d7-4225-9d08-331a27d6dccf",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -80,
+        -64
+      ],
+      "id": "40bd6c9a-1b38-4ade-9c74-9ad8c15cef97",
+      "name": "Creando un mensaje"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        128,
+        -64
+      ],
+      "id": "4f4b4570-2e3a-4fa6-98fc-519095938af3",
+      "name": "Sacando hora y fecha"
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n\n<html>\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>{{ $workflow.name }}</title>\n</head>\n<body>\n  <div class=\"container\">\n    <h1>{{ $('Creando un mensaje').item.json.mensaje }}</h1>\n    <h2>{{ $json.currentDate }}</h2>\n  </div>\n</body>\n</html>\n\n<style>\n.container {\n  background-color: #ffffff;\n  text-align: center;\n  padding: 16px;\n  border-radius: 8px;\n}\n\nh1 {\n  color: #ff6d5a;\n  font-size: 24px;\n  font-weight: bold;\n  padding: 8px;\n}\n\nh2 {\n  color: #909399;\n  font-size: 18px;\n  font-weight: bold;\n  padding: 8px;\n}\n</style>\n\n<script>\nconsole.log(\"Hello World!\");\n</script>"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        336,
+        -64
+      ],
+      "id": "363ff9e8-5ccc-4fbc-94b8-9470e2ece50f",
+      "name": "Utilizando variables de nodos anteriores para crear una web"
+    },
+    {
+      "parameters": {
+        "path": "mi-página-web",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -320,
+        -64
+      ],
+      "id": "a18f54c7-3d58-4e40-af05-89cd0dae2b4d",
+      "name": "Webhook",
+      "webhookId": "5640c419-0e6f-4493-af15-26a74d3e7898"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        528,
+        -64
+      ],
+      "id": "3bb71439-1927-427f-9608-2d04cbf6d52c",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Creando un mensaje": {
+      "main": [
+        [
+          {
+            "node": "Sacando hora y fecha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sacando hora y fecha": {
+      "main": [
+        [
+          {
+            "node": "Utilizando variables de nodos anteriores para crear una web",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Creando un mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Utilizando variables de nodos anteriores para crear una web": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "916ebac8-4b9a-45f4-9fa8-2d9a1a6e1860",
+  "meta": {
+    "instanceId": "33821b72dae919503d680e3ddc300734d9ecf45f64776fd52838d87d5889b7be"
+  },
+  "id": "ic71DrViUv3Hd08t",
+  "tags": []
+}

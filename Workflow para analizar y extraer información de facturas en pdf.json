@@ -1,0 +1,409 @@
+{
+  "name": "Workflow para analizar y extraer información de facturas en pdf",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -512,
+        -16
+      ],
+      "id": "f9095fa6-a0fd-4547-9088-4d7e19c9fba9",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wVZNRMD0DEEdS1ob",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Tu objetivo es extraer datos de la siguiente factura.\n\nInformación del archivo:\n-Nombre del archivo:{{ $json.file_name }}\n-Tipo del archivo:{{ $json.file_type }}\n-Contenido de la factura a analizar:{{ $json.file_content }}\n-Fecha de creación de la factura:{{ $json.file_date }}\n\nTu tarea es extraer todos los datos de la factura y devolver un json con la información completa para contabilidad.\n ",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        176,
+        -16
+      ],
+      "id": "9545d59b-820e-45d8-af45-e8c9e0ced5b2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2bacf8ba-5c41-4ba9-be82-11747d7426fb",
+              "name": "file_name",
+              "value": "={{ $('Download file').item.json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "9ef1cdab-c084-407c-947c-b5f7ff647fb7",
+              "name": "file_type",
+              "value": "={{ $('Google Drive Trigger').item.json.mimeType }}",
+              "type": "string"
+            },
+            {
+              "id": "7baa7ae2-6e22-4c1e-be08-20c33a09c9bf",
+              "name": "file_content",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "df874bd3-cb67-4e03-ba73-00735acee479",
+              "name": "file_date",
+              "value": "={{ $json.info.CreationDate }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -96,
+        -16
+      ],
+      "id": "aae0a5ee-a706-4173-a0b6-80488ad16950",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        192
+      ],
+      "id": "0cd01853-4f7c-4f0e-8edb-9f769b066dc8",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "phFuFxX6MoveqweM",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"factura_id\": \"X\",\n  \"fecha_emision\": \"X\",\n  \"empresa_emisora\": \"X\",\n  \"concepto\": \"ordenador portatil\",\n  \"total\": \"100 euros\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        192
+      ],
+      "id": "36c3299a-c29a-475d-b161-effcca2a156f",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        320,
+        192
+      ],
+      "id": "b22494b2-532f-4626-9dbb-2fcb4e0fae64",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        192
+      ],
+      "id": "034dd5ce-9fa4-4a57-bf0a-c2ce26ad203e",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1LtzxbihRwUdH3cn98oOn-ar4H4BzhxGvch-rTFk54zw",
+          "mode": "list",
+          "cachedResultName": "Facturas de gastos registradas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LtzxbihRwUdH3cn98oOn-ar4H4BzhxGvch-rTFk54zw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LtzxbihRwUdH3cn98oOn-ar4H4BzhxGvch-rTFk54zw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Factura_id": "={{ $json.output.factura_id }}",
+            "Fecha emisión": "={{ $json.output.fecha_emision }}",
+            "Empresa emisora": "={{ $json.output.empresa_emisora }}",
+            "Total factura": "={{ $json.output.total }}",
+            "Concepto": "={{ $json.output.concepto }}"
+          },
+          "matchingColumns": [
+            "Factura_id"
+          ],
+          "schema": [
+            {
+              "id": "Factura_id",
+              "displayName": "Factura_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha emisión",
+              "displayName": "Fecha emisión",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Empresa emisora",
+              "displayName": "Empresa emisora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Concepto",
+              "displayName": "Concepto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total factura",
+              "displayName": "Total factura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        -16
+      ],
+      "id": "7bf098b2-744f-4232-86cf-02a9874e04b2",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Jfv86xZViYGDZZ7d",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        -16
+      ],
+      "id": "89e01cde-d427-41ea-8281-8e3428708c57",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1Q28W21xbSxG0UKY1IBxumBvt9rYt4pr9",
+          "mode": "list",
+          "cachedResultName": "FacturasEmitidas",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1Q28W21xbSxG0UKY1IBxumBvt9rYt4pr9"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -752,
+        -16
+      ],
+      "id": "f6277132-35ae-4b97-93cd-22250eb1f560",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wVZNRMD0DEEdS1ob",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "38c30329-636a-41ff-b155-11b45152339d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "33821b72dae919503d680e3ddc300734d9ecf45f64776fd52838d87d5889b7be"
+  },
+  "id": "XT27N5CtOH73IX1Y",
+  "tags": []
+}

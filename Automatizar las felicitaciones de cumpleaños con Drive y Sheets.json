@@ -1,0 +1,283 @@
+{
+  "name": "Automatizar las felicitaciones de cumpleaños con Drive y Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -400,
+        -240
+      ],
+      "id": "a649204f-f82d-4e0e-8987-4dcd96376ae1",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "batchSize": 4,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -16,
+        -240
+      ],
+      "id": "31253cf7-1f21-4b41-83d4-44317e174573",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -112
+      ],
+      "id": "facd69de-f5d2-4044-8893-61c0b6930dc0",
+      "name": "Fecha Actual Completa"
+    },
+    {
+      "parameters": {
+        "operation": "extractDate",
+        "date": "={{ $json.currentDate }}",
+        "outputFieldName": "ActualMonth",
+        "options": {
+          "includeInputFields": false
+        }
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        416,
+        -112
+      ],
+      "id": "a24610f4-ada5-4fad-84ba-76ede88b8962",
+      "name": "Mes Actual"
+    },
+    {
+      "parameters": {
+        "operation": "extractDate",
+        "date": "={{ $('Fecha Actual Completa').item.json.currentDate }}",
+        "part": "day",
+        "outputFieldName": "ActualDay",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        624,
+        -112
+      ],
+      "id": "9e1924c3-315c-4568-8d9f-1413df6c29ea",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "operation": "extractDate",
+        "date": "={{ $json.ActualDay }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        224,
+        112
+      ],
+      "id": "0a2f5161-ede1-4e53-98b6-848c4f2f0e07",
+      "name": "Date & Time1"
+    },
+    {
+      "parameters": {
+        "operation": "extractDate",
+        "date": "={{ $json.datePart }}",
+        "part": "day",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        432,
+        112
+      ],
+      "id": "f548f6aa-e45c-4447-816c-eb00b2c6f2a2",
+      "name": "Date & Time2"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1x_8QY2Y8VjkemSQXWbTwguWPIaU4PVzbhPyPPGqwOug",
+          "mode": "list",
+          "cachedResultName": "Cumpleaños",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x_8QY2Y8VjkemSQXWbTwguWPIaU4PVzbhPyPPGqwOug/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1x_8QY2Y8VjkemSQXWbTwguWPIaU4PVzbhPyPPGqwOug/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -208,
+        -240
+      ],
+      "id": "2d2c157d-9ccf-4b98-98cc-37386efecc54",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Jfv86xZViYGDZZ7d",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "nordinmm28@gmail.com",
+        "subject": "=Feliz cumpleaños  {{ $('Date & Time').item.json.ActualDay }}",
+        "message": "asjknk,a",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        192,
+        -320
+      ],
+      "id": "e2934f44-d2aa-4826-a613-c11ea630f2f9",
+      "name": "Send a message",
+      "webhookId": "434b8543-4e37-4a08-ba52-0a77f4557513",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9nOuZ9ROkL6M7Abk",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fecha Actual Completa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fecha Actual Completa": {
+      "main": [
+        [
+          {
+            "node": "Mes Actual",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mes Actual": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Date & Time1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time1": {
+      "main": [
+        [
+          {
+            "node": "Date & Time2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a57c9605-888c-4508-9e70-25995a949977",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "33821b72dae919503d680e3ddc300734d9ecf45f64776fd52838d87d5889b7be"
+  },
+  "id": "Y4G8zJOsbEpu4gWk",
+  "tags": []
+}

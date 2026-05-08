@@ -1,0 +1,259 @@
+{
+  "name": "Integrar chatbots de n8n en paginas web",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -32,
+        -160
+      ],
+      "id": "26055814-ecaa-48ce-bc05-6b5fff7716cb",
+      "name": "When chat message received",
+      "webhookId": "8d3d3497-61cf-4f26-8b27-f06b96f42def"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "Eres un agente que solo y exclusivamente puede resolver dudas relacionadas con el padel.\n\nPuedes hablar de palas, recomendar palas y equipamiento de padel, historia del padel, reglas del padel, etc.\n\nCuando un usuario pida de alguna manera un presupuesto personalizado de palas de padel o de contrucción de pistas de padel, preguntale sus datos más importantes y enviamelo por email (usa la herramienta vinculada en el agente).\n\nLe tienes que pedir específicamente que te dé nombre, apellidos, email y número de teléfono.\n\nY le tienes que indicar que con estos datos vas a enviar un email al administrador y él te mandará un presupuesto personalizado con lo que necesitas.\n\nCualquier conversación de cualquier otra temática está prohibida."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        672,
+        -160
+      ],
+      "id": "7a4b8a52-860b-4d47-b9eb-1f6af5550c81",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        64
+      ],
+      "id": "4107e13a-0f64-4d2c-b122-3b07e9900d88",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "phFuFxX6MoveqweM",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -160
+      ],
+      "id": "a46a5e76-a7b7-492b-ad61-1d8604714cff",
+      "name": "Date & Time1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        32
+      ],
+      "id": "63d7ac98-fe3f-4016-9a84-1ba8b7863df1",
+      "name": "Fecha"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        720,
+        192
+      ],
+      "id": "e0bb8c36-631a-4c89-b861-1a3c1d07c36e",
+      "name": "Callculadora"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        592,
+        288
+      ],
+      "id": "9aa40a5d-5450-46dc-b583-1ba0109c8feb",
+      "name": "Pensar"
+    },
+    {
+      "parameters": {
+        "sendTo": "nordinmm28@gmail.com",
+        "subject": "=Cliente solicita presupuesto {{ $json.currentDate }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        240
+      ],
+      "id": "009e4cd2-f097-44da-b0b0-00431670a5cc",
+      "name": "Presupuesto de palas",
+      "webhookId": "31570e2c-5f82-4f66-96f0-8d66b77552f0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9nOuZ9ROkL6M7Abk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        192
+      ],
+      "id": "fac3c789-64bc-4178-aa9b-7b981266eff7",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Date & Time1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fecha": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Callculadora": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pensar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Presupuesto de palas": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "4008a51b-d843-44d0-befe-a6e88624a30d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "33821b72dae919503d680e3ddc300734d9ecf45f64776fd52838d87d5889b7be"
+  },
+  "id": "udVtWTuG2fIX0r1G",
+  "tags": []
+}

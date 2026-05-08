@@ -1,0 +1,170 @@
+{
+  "name": "Guardar clientes",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "¿Quieres que hagamos tu proyecto?",
+        "formDescription": "Contacta con nosotros si quieres que hagamos tu página web, automatización, webapp IA, etc. Lo que sea de desarrollo de software.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nombre",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Apellidos",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Número móvil",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Propuesta",
+              "fieldType": "textarea",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "Enviar Propuesta"
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -352,
+        -16
+      ],
+      "id": "018650d0-452b-43e7-a747-36c2981096b0",
+      "name": "On form submission",
+      "webhookId": "230b8f76-19c9-4d96-a47d-7226ab703125"
+    },
+    {
+      "parameters": {
+        "sendTo": "nordinmm28@gmail.com",
+        "subject": "Propuesta de proyecto de formulario de contacto",
+        "message": "=<h1>Propuesta de proyecto</h1>\n\n<h2>{{ $('On form submission').item.json.Nombre }} {{ $('On form submission').item.json.Apellidos }} dice:</h2>\n\n<p>{{ $('On form submission').item.json.Propuesta }}</p>\n\nSu número de teléfono es: <strong>{{ $('On form submission').item.json['Número móvil'] }}</strong>.\n<p>\nY el Email es: {{ $('On form submission').item.json.Email }}\n</p>\n\nResponde cuanto antes!!",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        -16
+      ],
+      "id": "91542a5c-7cae-4de6-8f60-5f09d0ee3b23",
+      "name": "Send a message",
+      "webhookId": "f1a1503d-4a6e-486a-9d89-6b2a0b7b47f0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9nOuZ9ROkL6M7Abk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "clientes",
+          "mode": "list",
+          "cachedResultName": "clientes"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "nombre",
+              "value": "={{ $json.Nombre }}"
+            },
+            {
+              "column": "apellidos",
+              "value": "={{ $json.Apellidos }}"
+            },
+            {
+              "column": "email",
+              "value": "={{ $json.Email }}"
+            },
+            {
+              "column": "telefono",
+              "value": "={{ $json['Número móvil'] }}"
+            },
+            {
+              "column": "propuesta",
+              "value": "={{ $json.Propuesta }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        -64,
+        -176
+      ],
+      "id": "be8b1ca9-2afd-493e-bcba-f8928ebf5fb3",
+      "name": "Guardar clientes en bases de datos",
+      "credentials": {
+        "mySql": {
+          "id": "hJOONuduO5siOR3M",
+          "name": "MySQL account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Guardar clientes en bases de datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    },
+    "Guardar clientes en bases de datos": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "0a592eab-d43f-4878-8ae9-40835323a23b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "33821b72dae919503d680e3ddc300734d9ecf45f64776fd52838d87d5889b7be"
+  },
+  "id": "CvsJHfXw1gbbQfIk",
+  "tags": []
+}

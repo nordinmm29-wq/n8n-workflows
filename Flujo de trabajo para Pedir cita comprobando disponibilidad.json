@@ -1,0 +1,351 @@
+{
+  "name": "Flujo de trabajo para Pedir cita comprobando disponibilidad",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Solicitar cita fisioterapia",
+        "formDescription": "Formulario para pedir cita al fisio",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nombre",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Apellidos",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Fecha",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Hora",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "9:00"
+                  },
+                  {
+                    "option": "10:00"
+                  },
+                  {
+                    "option": "11:00"
+                  },
+                  {
+                    "option": "12:00"
+                  },
+                  {
+                    "option": "13:00"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "SOLICITAR"
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "da94c2bb-121c-4ada-882e-50ffb183e078",
+      "name": "On form submission",
+      "webhookId": "ee441c00-5dd8-4d26-a450-4596bd016378"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": {
+          "__rl": true,
+          "value": "citas_fisioterapia",
+          "mode": "list",
+          "cachedResultName": "citas_fisioterapia"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "fecha",
+              "value": "={{ $json.Fecha }}"
+            },
+            {
+              "column": "hora",
+              "value": "={{ $json.Hora }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        208,
+        0
+      ],
+      "id": "6831ccc7-9e06-4bef-819c-efcc33d7515c",
+      "name": "Select rows from a table",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "hJOONuduO5siOR3M",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3443b42d-14f2-4111-b64a-6a53e4aa7304",
+              "leftValue": "={{ $json.fecha }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "73d92afd-7739-42a1-a03c-0e29d7533b24",
+              "leftValue": "={{ $json.hora }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "1e365f53-a8b5-4d30-8a43-98e4419909b3",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "Cambia la hora de la cita de Fisioterapia",
+        "message": "<h1>No hay disponibilidad para fecha y hora que has seleccionado.</h1> Cambia tu cita en el formulario.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        96
+      ],
+      "id": "472c6d82-a64d-453e-bdbb-556a38252119",
+      "name": "No se puede dar cita",
+      "webhookId": "bcf61db3-40b0-4408-8774-85ecaf85db18",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9nOuZ9ROkL6M7Abk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "citas_fisioterapia",
+          "mode": "list",
+          "cachedResultName": "citas_fisioterapia"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "nombre",
+              "value": "={{ $('On form submission').item.json.Nombre }}"
+            },
+            {
+              "column": "apellidos",
+              "value": "={{ $('On form submission').item.json.Apellidos }}"
+            },
+            {
+              "column": "email",
+              "value": "={{ $('On form submission').item.json.Email }}"
+            },
+            {
+              "column": "fecha",
+              "value": "={{ $('On form submission').item.json.Fecha }}"
+            },
+            {
+              "column": "hora",
+              "value": "={{ $('On form submission').item.json.Hora }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        624,
+        -96
+      ],
+      "id": "d83fb942-3968-40dd-b1c4-eaa63eb359be",
+      "name": "Guardar una nueva cita",
+      "credentials": {
+        "mySql": {
+          "id": "hJOONuduO5siOR3M",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "nordinmm28@gmail.com",
+        "subject": "Nueva cita registrada",
+        "message": "=Nueva cita confirmada para {{ $('On form submission').item.json.Nombre }} {{ $('On form submission').item.json.Apellidos }} con email {{ $('On form submission').item.json.Email }} a las {{ $('On form submission').item.json.Hora }} del {{ $('On form submission').item.json.Fecha }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        -192
+      ],
+      "id": "3af009db-d688-4e7e-8404-f9f35dfba00f",
+      "name": "Send a message",
+      "webhookId": "6ccf0d90-9136-4877-ab38-e34305e54945",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9nOuZ9ROkL6M7Abk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "Cita guardada",
+        "message": "=Hola, {{ $('On form submission').item.json.Nombre }}  ya tienes tu cita del fisio reservada a las {{ $('On form submission').item.json.Hora }} el dia {{ $('On form submission').item.json.Fecha }}.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        -32
+      ],
+      "id": "b1ec630d-52bd-4695-9a43-5e9cf9c22864",
+      "name": "Send a message1",
+      "webhookId": "e7db3227-bb93-4cc8-8130-4d72eb5c6a2d",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9nOuZ9ROkL6M7Abk",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select rows from a table": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Guardar una nueva cita",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No se puede dar cita",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar una nueva cita": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "cf398f67-190a-4099-a537-317a7a8842e4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "33821b72dae919503d680e3ddc300734d9ecf45f64776fd52838d87d5889b7be"
+  },
+  "id": "Hllrb2fVlhB7t4Hm",
+  "tags": []
+}
