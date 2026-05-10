@@ -1,0 +1,312 @@
+{
+  "name": "Workflow para buscar noticias de multiples sitios y traducirlas",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -64,
+        80
+      ],
+      "id": "f8d84d24-444d-4bf7-9acb-f65ae935f5cc",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://capgros.elnacional.cat/es/maresme",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        176,
+        -16
+      ],
+      "id": "2c4a6620-9e96-44c4-8cfa-d89b40e6be6b",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "sendTo": "nordinmm28@gmail.com",
+        "subject": "Multiples noticias IT",
+        "message": "={{ $('AI Agent').item.json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1136,
+        0
+      ],
+      "id": "4dbbbaca-f8ef-40be-8c7a-5c4fc79778b4",
+      "name": "Send a message",
+      "webhookId": "d9dc33db-08b5-4736-86b6-f85291724eb3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9nOuZ9ROkL6M7Abk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Tu objetivo es traducir las noticias de las últimas 24 horas, proporcionadas en el objeto data, el reste eliminalo.\n\nEste es objeto de hoy: {{ $json.body }}\n\nDebes traducirlas y devolver un listado en html ordenado y listo para enviar por email.\n\nCualquier otra cosa que se salga de tu objetivo está terminantemente prohibida.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "2da56484-3086-49b6-bdc9-35ea58e0fbbb",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "maxTokens": 32768
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        208
+      ],
+      "id": "1a00dc4b-1282-409d-9806-be77052f2198",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "phFuFxX6MoveqweM",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        480,
+        208
+      ],
+      "id": "46e99cf2-8320-4c71-9266-5904b526a7ee",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        576,
+        208
+      ],
+      "id": "906da809-cd11-4212-8247-2b18f0eb5b9c",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        928,
+        0
+      ],
+      "id": "31af4fbe-1b1f-4af6-9fe7-1b5e07247ea7",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -48
+      ],
+      "id": "5ff99492-5131-4bca-9f25-27ef57a24f1c",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "body",
+              "cssSelector": "body",
+              "returnValue": "html"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        -16
+      ],
+      "id": "dfb9ac82-6fdf-4d03-ad1f-51fe276c24ef",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [
+        672,
+        208
+      ],
+      "id": "01684bd4-bb76-43cf-8691-fda9919668ff",
+      "name": "Date & Time1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "5ac08575-f680-4c03-9250-46099537314f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "33821b72dae919503d680e3ddc300734d9ecf45f64776fd52838d87d5889b7be"
+  },
+  "id": "s2Df96y4VyShrSlN",
+  "tags": []
+}
